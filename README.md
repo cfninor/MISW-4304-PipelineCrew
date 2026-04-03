@@ -1,5 +1,3 @@
-# MISW-4304-PipelineCrew
-
 1. Clonación de proyecto:
 
 git clone https://github.com/cfninor/MISW-4304-PipelineCrew.git
@@ -7,6 +5,7 @@ git clone https://github.com/cfninor/MISW-4304-PipelineCrew.git
 2. Habilitación de entorno:
 
 python -m venv env
+
 env\Scripts\activate
 
 3. Instalación de dependencias:
