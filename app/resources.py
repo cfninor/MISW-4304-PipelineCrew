@@ -86,6 +86,33 @@ class BlacklistResource(Resource):
 
         except Exception:
             return {"msg": "Error interno del servidor"}, 500
-        
 
+
+class BlacklistEmailResource(Resource):
+    def get(self, email):
+        """Consultar si un email existe en la blacklist"""
+        try:
+            # Validar formato de email
+            if not is_valid_email(email):
+                return {"msg": "email no tiene un formato válido"}, 400
+
+            # Buscar el email en la blacklist
+            blacklist_item = Blacklist.query.filter_by(email=email).first()
+            
+            if blacklist_item:
+                return {
+                    "msg": "El email está en la lista negra",
+                    "exists": True,
+                    "blocked_reason": blacklist_item.blocked_reason,
+                    "blocked_at": blacklist_item.created_at.isoformat(),
+                    "app_uuid": blacklist_item.app_uuid
+                }, 200
+            else:
+                return {
+                    "msg": "El email no está en la lista negra",
+                    "exists": False
+                }, 200
+                
+        except Exception:
+            return {"msg": "Error interno del servidor"}, 500
         
