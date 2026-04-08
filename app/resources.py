@@ -1,7 +1,6 @@
 from flask import request
 from flask_restful import Resource
-#from flask_jwt_extended import create_access_token
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import create_access_token, jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from uuid import UUID
 import re
@@ -115,4 +114,17 @@ class BlacklistEmailResource(Resource):
                 
         except Exception:
             return {"msg": "Error interno del servidor"}, 500
+
+
+class TokenGeneratorResource(Resource):
+    """Generar token JWT para usar en otros endpoints"""
+    def get(self):
+        try:
+            token = create_access_token(identity="static-user")
+            return {
+                "msg": "Token generado exitosamente",
+                "access_token": token
+            }, 200
+        except Exception:
+            return {"msg": "Error al generar el token"}, 500
         

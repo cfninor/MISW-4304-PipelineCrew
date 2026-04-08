@@ -40,8 +40,9 @@ def create_app():
 
     api = Api(app)
 
-    from app.resources import BlacklistResource, BlacklistEmailResource
+    from app.resources import BlacklistResource, BlacklistEmailResource, TokenGeneratorResource
 
+    api.add_resource(TokenGeneratorResource, "/generate-token")
     api.add_resource(BlacklistResource, "/blacklists")
     api.add_resource(BlacklistEmailResource, "/blacklists/<string:email>")
 

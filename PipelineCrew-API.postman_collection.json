@@ -1,0 +1,142 @@
+{
+  "info": {
+    "_postman_id": "blacklist-api-collection",
+    "name": "PipelineCrew - Blacklist API",
+    "description": "Colección de endpoints para la API de gestión de blacklist de emails",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Generar Token JWT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set('token', jsonData.access_token);",
+              "console.log('✓ Token guardado: ' + jsonData.access_token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{base_url}}/generate-token",
+          "protocol": "http",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "generate-token"
+          ]
+        },
+        "description": "Genera un token JWT válido. Ejecuta este primero, automáticamente guardará el token en la variable {{token}} para los demás requests."
+      }
+    },
+    {
+      "name": "2. Agregar email a blacklist (POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"attacker@suspicious.com\",\n  \"app_uuid\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"blocked_reason\": \"Actividad maliciosa detectada\",\n  \"ip_address\": \"192.168.1.1\"\n}"
+        },
+        "url": {
+          "raw": "http://{{base_url}}/blacklists",
+          "protocol": "http",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "blacklists"
+          ]
+        },
+        "description": "Agrega un email a la blacklist (requiere token JWT)"
+      }
+    },
+    {
+      "name": "3. Verificar si email está en blacklist (GET)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{base_url}}/blacklists/attacker@suspicious.com",
+          "protocol": "http",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "blacklists",
+            "attacker@suspicious.com"
+          ]
+        },
+        "description": "Consulta si un email específico está en la blacklist"
+      }
+    },
+    {
+      "name": "4. Verificar email válido (no en blacklist)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{base_url}}/blacklists/validemail@example.com",
+          "protocol": "http",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "blacklists",
+            "validemail@example.com"
+          ]
+        },
+        "description": "Consulta un email que existe pero no está en la blacklist"
+      }
+    },
+    {
+      "name": "5. Verificar email con formato inválido",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{base_url}}/blacklists/invalidemail",
+          "protocol": "http",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "blacklists",
+            "invalidemail"
+          ]
+        },
+        "description": "Consulta un email con formato inválido (sin @)"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
