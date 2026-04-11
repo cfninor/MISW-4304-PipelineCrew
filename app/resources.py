@@ -88,6 +88,7 @@ class BlacklistResource(Resource):
 
 
 class BlacklistEmailResource(Resource):
+    @jwt_required()
     def get(self, email):
         """Consultar si un email existe en la blacklist"""
         try:
