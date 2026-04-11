@@ -150,7 +150,16 @@ DB_PASSWORD=postgres
     "exists": false
   }
   ```
-
+### Health Check
+- **GET** `/health`
+- Descripción: Verifica que la aplicación esté en funcionamiento y que la base de datos esté disponible.
+- Respuesta exitosa:
+  ```json
+  {
+    "status": "ok",
+    "database": "up"
+  }
+  
 ## Pruebas
 
 ### Ejecutar Tests
