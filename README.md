@@ -159,7 +159,7 @@ pytest tests.py -v
 ```
 
 ### Prueba con Postman
-1. Importa la colección `PipelineCrew-API.postman_collection.json` en Postman.
+1. Importa la colección `PipelineCrew - Blacklist API.postman_collection.json` en Postman.
 2. Genera un token usando el endpoint `/generate-token`.
 3. El token generado ya se utilizará en los headers por medio de una variable.
 

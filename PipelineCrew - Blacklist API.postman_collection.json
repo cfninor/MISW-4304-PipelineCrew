@@ -1,9 +1,10 @@
 {
   "info": {
-    "_postman_id": "blacklist-api-collection",
+    "_postman_id": "802f2f9e-ee1f-4a29-a38f-d05ffbdfe139",
     "name": "PipelineCrew - Blacklist API",
     "description": "Colección de endpoints para la API de gestión de blacklist de emails",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51975862"
   },
   "item": [
     {
@@ -16,7 +17,8 @@
               "var jsonData = pm.response.json();",
               "pm.collectionVariables.set('token', jsonData.access_token);",
               "console.log('✓ Token guardado: ' + jsonData.access_token);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -34,11 +36,15 @@
           ]
         },
         "description": "Genera un token JWT válido. Ejecuta este primero, automáticamente guardará el token en la variable {{token}} para los demás requests."
-      }
+      },
+      "response": []
     },
     {
       "name": "2. Agregar email a blacklist (POST)",
       "request": {
+        "auth": {
+          "type": "noauth"
+        },
         "method": "POST",
         "header": [
           {
@@ -67,13 +73,20 @@
           ]
         },
         "description": "Agrega un email a la blacklist (requiere token JWT)"
-      }
+      },
+      "response": []
     },
     {
       "name": "3. Verificar si email está en blacklist (GET)",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
         "url": {
           "raw": "http://{{base_url}}/blacklists/attacker@suspicious.com",
           "protocol": "http",
@@ -86,13 +99,20 @@
           ]
         },
         "description": "Consulta si un email específico está en la blacklist"
-      }
+      },
+      "response": []
     },
     {
       "name": "4. Verificar email válido (no en blacklist)",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
         "url": {
           "raw": "http://{{base_url}}/blacklists/validemail@example.com",
           "protocol": "http",
@@ -105,13 +125,20 @@
           ]
         },
         "description": "Consulta un email que existe pero no está en la blacklist"
-      }
+      },
+      "response": []
     },
     {
       "name": "5. Verificar email con formato inválido",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
         "url": {
           "raw": "http://{{base_url}}/blacklists/invalidemail",
           "protocol": "http",
@@ -124,19 +151,42 @@
           ]
         },
         "description": "Consulta un email con formato inválido (sin @)"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
       }
     }
   ],
   "variable": [
     {
       "key": "base_url",
-      "value": "localhost:5000",
-      "type": "string"
+      "value": "localhost:5000"
     },
     {
       "key": "token",
-      "value": "",
-      "type": "string"
+      "value": ""
     }
   ]
 }
