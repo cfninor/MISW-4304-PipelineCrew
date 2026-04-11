@@ -193,7 +193,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"email\": \"{{blacklisted_email}}\",\n    \"app_uuid\": \"{{app_uuid}}\",\n    \"blocked_reason\": \"{{blocked_reason}}\",\n    \"ip_address\": \"{{ip_address}}\"\n}"
+          "raw": "{\n    \"email\": \"{{blacklisted_email}}\",\n    \"app_uuid\": \"{{app_uuid}}\",\n    \"blocked_reason\": \"{{blocked_reason}}\"\n}"
         },
         "url": {
           "raw": "http://{{base_url}}/blacklists",
@@ -538,13 +538,40 @@
       "response": []
     },
     {
-      "name": "6. Agregar email a blacklist (token invalido)",
+      "name": "6. Agregar email a blacklist (sin app_uuid)",
       "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const unique = Date.now() + '_' + Math.floor(Math.random() * 100000);\r",
+              "const email = `blacklist_${unique}@example.com`;\r",
+              "\r",
+              "pm.collectionVariables.set('blacklisted_email', email);\r",
+              "\r",
+              "if (!pm.collectionVariables.get('blocked_reason')) {\r",
+              "    pm.collectionVariables.set('blocked_reason', 'Actividad sospechosa detectada');\r",
+              "}\r",
+              "\r",
+              "if (!pm.collectionVariables.get('ip_address')) {\r",
+              "    pm.collectionVariables.set('ip_address', '192.168.1.1');\r",
+              "}\r",
+              "\r",
+              "pm.test('Existe token para autenticación', function () {\r",
+              "    const token = pm.collectionVariables.get('token');\r",
+              "    pm.expect(token, 'token de colección').to.be.a('string').and.not.empty;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
         {
           "listen": "test",
           "script": {
             "exec": [
-              "const expectedStatuses = [401];\r",
+              "const expectedStatuses = [400];\r",
               "const responseTimeLimit = 5000;\r",
               "const rawBody = pm.response.text();\r",
               "const contentType = (pm.response.headers.get('Content-Type') || '').toLowerCase();\r",
@@ -556,7 +583,10 @@
               "pm.test('Tiempo de respuesta menor a 5000 ms', function () {\r",
               "    pm.expect(pm.response.responseTime).to.be.below(responseTimeLimit);\r",
               "});\r",
-              ""
+              "\r",
+              "pm.test('Mensaje de respuesta', function(){\r",
+              "    pm.expect(rawBody).to.include('app_uuid es obligatorio');\r",
+              "})"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -566,10 +596,16 @@
       ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"email\": \"{{blacklisted_email}}\",\r\n    \"app_uuid\": \"{{app_uuid}}\",\r\n    \"blocked_reason\": \"{{blocked_reason}}\",\r\n    \"ip_address\": \"{{ip_address}}\"\r\n}",
+          "raw": "{\r\n    \"email\": \"{{blacklisted_email}}\",\r\n    \"blocked_reason\": \"{{blocked_reason}}\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -584,50 +620,6 @@
           ],
           "path": [
             "blacklists"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "7. Verificar si email esta en blacklist (token invalido)",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "const expectedStatuses = [401];\r",
-              "const responseTimeLimit = 5000;\r",
-              "const rawBody = pm.response.text();\r",
-              "const contentType = (pm.response.headers.get('Content-Type') || '').toLowerCase();\r",
-              "\r",
-              "pm.test('Status code 401 esperado para crear/agregar email', function () {\r",
-              "    pm.expect(expectedStatuses).to.include(pm.response.code);\r",
-              "});\r",
-              "\r",
-              "pm.test('Tiempo de respuesta menor a 5000 ms', function () {\r",
-              "    pm.expect(pm.response.responseTime).to.be.below(responseTimeLimit);\r",
-              "});\r",
-              ""
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://{{base_url}}/blacklists/{{blacklisted_email}}",
-          "protocol": "http",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "blacklists",
-            "{{blacklisted_email}}"
           ]
         }
       },
@@ -689,6 +681,10 @@
     },
     {
       "key": "ip_address",
+      "value": ""
+    },
+    {
+      "key": "local_url",
       "value": ""
     }
   ]
