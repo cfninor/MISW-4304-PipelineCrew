@@ -164,14 +164,9 @@ pytest tests.py -v
 3. El token generado ya se utilizará en los headers por medio de una variable.
 
 Ejemplo de request POST:
-- URL: `http://localhost:5001/blacklists`
+- URL: `http://localhost:5000/blacklists`
 - Headers: `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 - Body: JSON como arriba.
-
-Token estático de ejemplo:
-```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NTkzMTU2MCwianRpIjoiOGMxYTZiYzQtYWFiNy00OGVhLThlODMtYWU5ZTY0ODJmY2FhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6InN0YXRpYy11c2VyIiwibmJmIjoxNzc1OTMxNTYwLCJjc3JmIjoiMmMzOTU5Y2MtNWFmZC00ODI2LWExMjctYmY2ZjlkNTg1YWMwIiwiZXhwIjoxODA3NDY3NTYwfQ.FygqAdIliS2H4tysNWpZgj7k_yg7XwxdCt2JQeHTTks
-```
 
 ## Estructura del Proyecto
 
