@@ -39,8 +39,12 @@
         {
           "listen": "prerequest",
           "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
             "packages": {},
-            "type": "text/javascript"
+            "requests": {}
           }
         }
       ],
@@ -48,10 +52,14 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://{{base_url}}/generate-token",
+          "raw": "http://p1e1-blacklist-env.eba-tihwm3np.us-east-1.elasticbeanstalk.com/generate-token",
           "protocol": "http",
           "host": [
-            "{{base_url}}"
+            "p1e1-blacklist-env",
+            "eba-tihwm3np",
+            "us-east-1",
+            "elasticbeanstalk",
+            "com"
           ],
           "path": [
             "generate-token"
@@ -193,13 +201,17 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"email\": \"{{blacklisted_email}}\",\n    \"app_uuid\": \"{{app_uuid}}\",\n    \"blocked_reason\": \"{{blocked_reason}}\"\n}"
+          "raw": "{\n    \"email\": \"{{blacklisted_email}}\",\n    \"app_uuid\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"blocked_reason\": \"Actividad sospechosa detectada\"\n}"
         },
         "url": {
-          "raw": "http://{{base_url}}/blacklists",
+          "raw": "http://p1e1-blacklist-env.eba-tihwm3np.us-east-1.elasticbeanstalk.com/blacklists",
           "protocol": "http",
           "host": [
-            "{{base_url}}"
+            "p1e1-blacklist-env",
+            "eba-tihwm3np",
+            "us-east-1",
+            "elasticbeanstalk",
+            "com"
           ],
           "path": [
             "blacklists"
@@ -306,10 +318,14 @@
           }
         ],
         "url": {
-          "raw": "http://{{base_url}}/blacklists/{{blacklisted_email}}",
+          "raw": "http://p1e1-blacklist-env.eba-tihwm3np.us-east-1.elasticbeanstalk.com/blacklists/{{blacklisted_email}}",
           "protocol": "http",
           "host": [
-            "{{base_url}}"
+            "p1e1-blacklist-env",
+            "eba-tihwm3np",
+            "us-east-1",
+            "elasticbeanstalk",
+            "com"
           ],
           "path": [
             "blacklists",
@@ -417,10 +433,14 @@
           }
         ],
         "url": {
-          "raw": "http://{{base_url}}/blacklists/{{valid_email}}",
+          "raw": "http://p1e1-blacklist-env.eba-tihwm3np.us-east-1.elasticbeanstalk.com/blacklists/{{valid_email}}",
           "protocol": "http",
           "host": [
-            "{{base_url}}"
+            "p1e1-blacklist-env",
+            "eba-tihwm3np",
+            "us-east-1",
+            "elasticbeanstalk",
+            "com"
           ],
           "path": [
             "blacklists",
@@ -523,14 +543,18 @@
           }
         ],
         "url": {
-          "raw": "http://{{base_url}}/blacklists/{{invalid_email}}",
+          "raw": "http://p1e1-blacklist-env.eba-tihwm3np.us-east-1.elasticbeanstalk.com/blacklists/invalidemail",
           "protocol": "http",
           "host": [
-            "{{base_url}}"
+            "p1e1-blacklist-env",
+            "eba-tihwm3np",
+            "us-east-1",
+            "elasticbeanstalk",
+            "com"
           ],
           "path": [
             "blacklists",
-            "{{invalid_email}}"
+            "invalidemail"
           ]
         },
         "description": "Consulta un email con formato inválido (sin @)"
@@ -605,7 +629,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"email\": \"{{blacklisted_email}}\",\r\n    \"blocked_reason\": \"{{blocked_reason}}\"\r\n}",
+          "raw": "{\r\n    \"email\": \"{{blacklisted_email}}\",\r\n    \"blocked_reason\": \"Actividad sospechosa detectada\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -613,10 +637,14 @@
           }
         },
         "url": {
-          "raw": "http://{{base_url}}/blacklists",
+          "raw": "http://p1e1-blacklist-env.eba-tihwm3np.us-east-1.elasticbeanstalk.com/blacklists",
           "protocol": "http",
           "host": [
-            "{{base_url}}"
+            "p1e1-blacklist-env",
+            "eba-tihwm3np",
+            "us-east-1",
+            "elasticbeanstalk",
+            "com"
           ],
           "path": [
             "blacklists"
@@ -652,10 +680,6 @@
   ],
   "variable": [
     {
-      "key": "base_url",
-      "value": "localhost:5000"
-    },
-    {
       "key": "token",
       "value": ""
     },
@@ -681,10 +705,6 @@
     },
     {
       "key": "ip_address",
-      "value": ""
-    },
-    {
-      "key": "local_url",
       "value": ""
     }
   ]
