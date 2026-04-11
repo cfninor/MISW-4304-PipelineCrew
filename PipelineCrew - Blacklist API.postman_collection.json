@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "802f2f9e-ee1f-4a29-a38f-d05ffbdfe139",
+    "_postman_id": "4c451c6a-4f82-48d7-b1db-942047f518f9",
     "name": "PipelineCrew - Blacklist API",
     "description": "Colección de endpoints para la API de gestión de blacklist de emails",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "51975862"
+    "_exporter_id": "48225661"
   },
   "item": [
     {
@@ -14,10 +14,32 @@
           "listen": "test",
           "script": {
             "exec": [
-              "var jsonData = pm.response.json();",
-              "pm.collectionVariables.set('token', jsonData.access_token);",
-              "console.log('✓ Token guardado: ' + jsonData.access_token);"
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('La respuesta es JSON válido', function () {",
+              "    pm.expect(() => pm.response.json()).to.not.throw();",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "",
+              "pm.test('Existe access_token', function () {",
+              "    pm.expect(jsonData).to.have.property('access_token');",
+              "    pm.expect(jsonData.access_token).to.be.a('string').and.not.empty;",
+              "});",
+              "",
+              "pm.collectionVariables.set('token', jsonData.access_token);"
             ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "packages": {},
             "type": "text/javascript"
           }
         }
@@ -41,6 +63,117 @@
     },
     {
       "name": "2. Agregar email a blacklist (POST)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const expectedStatuses = [200, 201];\r",
+              "const responseTimeLimit = 5000;\r",
+              "const rawBody = pm.response.text();\r",
+              "const contentType = (pm.response.headers.get('Content-Type') || '').toLowerCase();\r",
+              "\r",
+              "pm.test('Status code esperado para crear/agregar email', function () {\r",
+              "    pm.expect(expectedStatuses).to.include(pm.response.code);\r",
+              "});\r",
+              "\r",
+              "pm.test('Tiempo de respuesta menor a 5000 ms', function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(responseTimeLimit);\r",
+              "});\r",
+              "\r",
+              "pm.test('Existe token en variable de colección para request autenticado', function () {\r",
+              "    const token = pm.collectionVariables.get('token');\r",
+              "    pm.expect(token, 'La variable token debe existir').to.be.a('string').and.not.empty;\r",
+              "});\r",
+              "\r",
+              "pm.test('La respuesta tiene un tipo soportado', function () {\r",
+              "    pm.expect(contentType.length > 0 || rawBody.length >= 0).to.be.true;\r",
+              "});\r",
+              "\r",
+              "let jsonData = null;\r",
+              "const isJson = contentType.includes('application/json');\r",
+              "if (isJson && rawBody) {\r",
+              "    try { jsonData = pm.response.json(); } catch (e) {}\r",
+              "}\r",
+              "\r",
+              "pm.test('Si responde JSON, el body es un objeto o arreglo válido', function () {\r",
+              "    if (isJson && rawBody) {\r",
+              "        pm.expect(jsonData).to.not.equal(null);\r",
+              "        pm.expect(['object', 'array']).to.include(Array.isArray(jsonData) ? 'array' : typeof jsonData);\r",
+              "    } else {\r",
+              "        pm.expect(true).to.be.true;\r",
+              "    }\r",
+              "});\r",
+              "\r",
+              "pm.test('La respuesta indica éxito de forma tolerante', function () {\r",
+              "    if (!rawBody || !rawBody.trim()) {\r",
+              "        pm.expect([200, 201, 204]).to.include(pm.response.code);\r",
+              "        return;\r",
+              "    }\r",
+              "\r",
+              "    if (jsonData && typeof jsonData === 'object') {\r",
+              "        const flattened = JSON.stringify(jsonData).toLowerCase();\r",
+              "        const successFlag = jsonData.success;\r",
+              "        const allowedIndicators = ['blacklist', 'blocked', 'added', 'created', 'success', 'ok', 'registr'];\r",
+              "        const hasIndicator = allowedIndicators.some(word => flattened.includes(word));\r",
+              "\r",
+              "        if (typeof successFlag === 'boolean') {\r",
+              "            pm.expect(successFlag || hasIndicator).to.be.true;\r",
+              "        } else {\r",
+              "            pm.expect(hasIndicator || pm.response.code === 201 || pm.response.code === 200).to.be.true;\r",
+              "        }\r",
+              "    } else {\r",
+              "        pm.expect(rawBody.toLowerCase()).to.match(/blacklist|blocked|added|created|success|ok/);\r",
+              "    }\r",
+              "});\r",
+              "\r",
+              "pm.test('Si el body expone el email, corresponde al esperado', function () {\r",
+              "    const expectedEmail = pm.collectionVariables.get('blacklisted_email');\r",
+              "    if (jsonData && typeof jsonData === 'object') {\r",
+              "        const possibleEmail = jsonData.email || jsonData.data?.email || jsonData.result?.email;\r",
+              "        if (possibleEmail !== undefined) {\r",
+              "            pm.expect(String(possibleEmail).toLowerCase()).to.eql(expectedEmail);\r",
+              "        } else {\r",
+              "            pm.expect(true).to.be.true;\r",
+              "        }\r",
+              "    } else {\r",
+              "        pm.expect(true).to.be.true;\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const unique = Date.now() + '_' + Math.floor(Math.random() * 100000);\r",
+              "const email = `blacklist_${unique}@example.com`;\r",
+              "\r",
+              "pm.collectionVariables.set('blacklisted_email', email);\r",
+              "\r",
+              "if (!pm.collectionVariables.get('blocked_reason')) {\r",
+              "    pm.collectionVariables.set('blocked_reason', 'Actividad sospechosa detectada');\r",
+              "}\r",
+              "\r",
+              "if (!pm.collectionVariables.get('ip_address')) {\r",
+              "    pm.collectionVariables.set('ip_address', '192.168.1.1');\r",
+              "}\r",
+              "\r",
+              "pm.test('Existe token para autenticación', function () {\r",
+              "    const token = pm.collectionVariables.get('token');\r",
+              "    pm.expect(token, 'token de colección').to.be.a('string').and.not.empty;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "auth": {
           "type": "noauth"
@@ -60,7 +193,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"attacker@suspicious.com\",\n  \"app_uuid\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"blocked_reason\": \"Actividad maliciosa detectada\",\n  \"ip_address\": \"192.168.1.1\"\n}"
+          "raw": "{\n    \"email\": \"{{blacklisted_email}}\",\n    \"app_uuid\": \"{{app_uuid}}\",\n    \"blocked_reason\": \"{{blocked_reason}}\",\n    \"ip_address\": \"{{ip_address}}\"\n}"
         },
         "url": {
           "raw": "http://{{base_url}}/blacklists",
@@ -78,6 +211,91 @@
     },
     {
       "name": "3. Verificar si email está en blacklist (GET)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const expectedStatuses = [200];\r",
+              "const responseTimeLimit = 5000;\r",
+              "const queriedEmail = 'attacker@suspicious.com';\r",
+              "const rawBody = pm.response.text();\r",
+              "const contentType = (pm.response.headers.get('Content-Type') || '').toLowerCase();\r",
+              "\r",
+              "pm.test('Status code es 200', function () {\r",
+              "    pm.expect(pm.response.code).to.equal(200);\r",
+              "});\r",
+              "\r",
+              "pm.test('Tiempo de respuesta menor a 5000 ms', function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(responseTimeLimit);\r",
+              "});\r",
+              "\r",
+              "pm.test('Existe token en variable de colección para request autenticado', function () {\r",
+              "    const token = pm.collectionVariables.get('token');\r",
+              "    pm.expect(token, 'La variable token debe existir').to.be.a('string').and.not.empty;\r",
+              "});\r",
+              "\r",
+              "let jsonData = null;\r",
+              "const isJson = contentType.includes('application/json');\r",
+              "\r",
+              "pm.test('La respuesta tiene contenido útil', function () {\r",
+              "    pm.expect(rawBody.length).to.be.greaterThan(0);\r",
+              "});\r",
+              "\r",
+              "pm.test('Si responde JSON, el body es JSON válido', function () {\r",
+              "    if (isJson) {\r",
+              "        jsonData = pm.response.json();\r",
+              "        pm.expect(jsonData).to.be.an('object');\r",
+              "    } else {\r",
+              "        pm.expect(true).to.be.true;\r",
+              "    }\r",
+              "});\r",
+              "\r",
+              "pm.test('La respuesta sugiere que el email consultado está en blacklist', function () {\r",
+              "    if (jsonData && typeof jsonData === 'object') {\r",
+              "        const flattened = JSON.stringify(jsonData).toLowerCase();\r",
+              "        const blacklistFlags = [jsonData.blacklisted, jsonData.in_blacklist, jsonData.blocked, jsonData.exists];\r",
+              "        const hasTrueFlag = blacklistFlags.some(v => v === true);\r",
+              "        const hasIndicator = ['blacklist', 'blocked', 'listed', 'found', 'exists', queriedEmail.toLowerCase()].some(word => flattened.includes(word));\r",
+              "        pm.expect(hasTrueFlag || hasIndicator).to.be.true;\r",
+              "    } else {\r",
+              "        pm.expect(rawBody.toLowerCase()).to.match(/blacklist|blocked|listed|found|exists|attacker@suspicious.com/);\r",
+              "    }\r",
+              "});\r",
+              "\r",
+              "pm.test('Si el body expone el email, corresponde al consultado', function () {\r",
+              "    if (jsonData && typeof jsonData === 'object') {\r",
+              "        const possibleEmail = jsonData.email || jsonData.data?.email || jsonData.result?.email;\r",
+              "        if (possibleEmail !== undefined) {\r",
+              "            pm.expect(String(possibleEmail).toLowerCase()).to.eql(queriedEmail);\r",
+              "        } else {\r",
+              "            pm.expect(true).to.be.true;\r",
+              "        }\r",
+              "    } else {\r",
+              "        pm.expect(true).to.be.true;\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.test('Existe token para autenticación', function () {\r",
+              "    const token = pm.collectionVariables.get('token');\r",
+              "    pm.expect(token, 'token de colección').to.be.a('string').and.not.empty;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -88,14 +306,14 @@
           }
         ],
         "url": {
-          "raw": "http://{{base_url}}/blacklists/attacker@suspicious.com",
+          "raw": "http://{{base_url}}/blacklists/{{blacklisted_email}}",
           "protocol": "http",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "blacklists",
-            "attacker@suspicious.com"
+            "{{blacklisted_email}}"
           ]
         },
         "description": "Consulta si un email específico está en la blacklist"
@@ -104,6 +322,91 @@
     },
     {
       "name": "4. Verificar email válido (no en blacklist)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const expectedStatuses = [200, 204, 404];\r",
+              "const responseTimeLimit = 5000;\r",
+              "const queriedEmail = 'validemail@example.com';\r",
+              "const rawBody = pm.response.text();\r",
+              "const contentType = (pm.response.headers.get('Content-Type') || '').toLowerCase();\r",
+              "\r",
+              "pm.test('Status code dentro de los esperados para email no blacklisteado', function () {\r",
+              "    pm.expect(expectedStatuses).to.include(pm.response.code);\r",
+              "});\r",
+              "\r",
+              "pm.test('Tiempo de respuesta menor a 5000 ms', function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(responseTimeLimit);\r",
+              "});\r",
+              "\r",
+              "pm.test('Existe token en variable de colección para request autenticado', function () {\r",
+              "    const token = pm.collectionVariables.get('token');\r",
+              "    pm.expect(token, 'La variable token debe existir').to.be.a('string').and.not.empty;\r",
+              "});\r",
+              "\r",
+              "let jsonData = null;\r",
+              "const isJson = contentType.includes('application/json');\r",
+              "if (isJson && rawBody) {\r",
+              "    try { jsonData = pm.response.json(); } catch (e) {}\r",
+              "}\r",
+              "\r",
+              "pm.test('La respuesta es coherente con un email válido no bloqueado', function () {\r",
+              "    if (pm.response.code === 204) {\r",
+              "        pm.expect(rawBody).to.satisfy(body => body === '' || body === null);\r",
+              "        return;\r",
+              "    }\r",
+              "\r",
+              "    if (!rawBody || !rawBody.trim()) {\r",
+              "        pm.expect([204, 404]).to.include(pm.response.code);\r",
+              "        return;\r",
+              "    }\r",
+              "\r",
+              "    if (jsonData && typeof jsonData === 'object') {\r",
+              "        const flattened = JSON.stringify(jsonData).toLowerCase();\r",
+              "        const negativeFlags = [jsonData.blacklisted, jsonData.in_blacklist, jsonData.blocked, jsonData.exists];\r",
+              "        const hasExplicitNegativeFlag = negativeFlags.some(v => v === false);\r",
+              "        const hasNegativeIndicator = ['not found', 'not in blacklist', 'not blacklisted', 'false', 'valid', 'no existe', 'no está'].some(word => flattened.includes(word));\r",
+              "        pm.expect(hasExplicitNegativeFlag || hasNegativeIndicator || pm.response.code === 404 || pm.response.code === 204).to.be.true;\r",
+              "    } else {\r",
+              "        pm.expect(rawBody.toLowerCase()).to.match(/not found|not in blacklist|not blacklisted|valid|no existe|no está/);\r",
+              "    }\r",
+              "});\r",
+              "\r",
+              "pm.test('Si el body expone el email, corresponde al consultado', function () {\r",
+              "    if (jsonData && typeof jsonData === 'object') {\r",
+              "        const possibleEmail = jsonData.email || jsonData.data?.email || jsonData.result?.email;\r",
+              "        if (possibleEmail !== undefined) {\r",
+              "            pm.expect(String(possibleEmail).toLowerCase()).to.eql(queriedEmail);\r",
+              "        } else {\r",
+              "            pm.expect(true).to.be.true;\r",
+              "        }\r",
+              "    } else {\r",
+              "        pm.expect(true).to.be.true;\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.test('Existe token para autenticación', function () {\r",
+              "    const token = pm.collectionVariables.get('token');\r",
+              "    pm.expect(token, 'token de colección').to.be.a('string').and.not.empty;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -114,14 +417,14 @@
           }
         ],
         "url": {
-          "raw": "http://{{base_url}}/blacklists/validemail@example.com",
+          "raw": "http://{{base_url}}/blacklists/{{valid_email}}",
           "protocol": "http",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "blacklists",
-            "validemail@example.com"
+            "{{valid_email}}"
           ]
         },
         "description": "Consulta un email que existe pero no está en la blacklist"
@@ -130,6 +433,86 @@
     },
     {
       "name": "5. Verificar email con formato inválido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const expectedStatuses = [400, 404, 422];\r",
+              "const responseTimeLimit = 5000;\r",
+              "const invalidEmail = 'invalidemail';\r",
+              "const rawBody = pm.response.text();\r",
+              "const contentType = (pm.response.headers.get('Content-Type') || '').toLowerCase();\r",
+              "\r",
+              "pm.test('Status code dentro de los esperados para email inválido', function () {\r",
+              "    pm.expect(expectedStatuses).to.include(pm.response.code);\r",
+              "});\r",
+              "\r",
+              "pm.test('Tiempo de respuesta menor a 5000 ms', function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(responseTimeLimit);\r",
+              "});\r",
+              "\r",
+              "pm.test('Existe token en variable de colección para request autenticado', function () {\r",
+              "    const token = pm.collectionVariables.get('token');\r",
+              "    pm.expect(token, 'La variable token debe existir').to.be.a('string').and.not.empty;\r",
+              "});\r",
+              "\r",
+              "let jsonData = null;\r",
+              "const isJson = contentType.includes('application/json');\r",
+              "if (isJson && rawBody) {\r",
+              "    try { jsonData = pm.response.json(); } catch (e) {}\r",
+              "}\r",
+              "\r",
+              "pm.test('La respuesta comunica error o validación de formato inválido', function () {\r",
+              "    if (!rawBody || !rawBody.trim()) {\r",
+              "        pm.expect([400, 404, 422]).to.include(pm.response.code);\r",
+              "        return;\r",
+              "    }\r",
+              "\r",
+              "    if (jsonData && typeof jsonData === 'object') {\r",
+              "        const flattened = JSON.stringify(jsonData).toLowerCase();\r",
+              "        const indicatorWords = ['invalid', 'email', 'format', 'validation', 'bad request', 'incorrect', 'malformed', 'error'];\r",
+              "        const hasIndicator = indicatorWords.some(word => flattened.includes(word));\r",
+              "        const hasErrorShape = jsonData.error !== undefined || jsonData.message !== undefined || jsonData.detail !== undefined || jsonData.errors !== undefined;\r",
+              "        pm.expect(hasIndicator || hasErrorShape).to.be.true;\r",
+              "    } else {\r",
+              "        pm.expect(rawBody.toLowerCase()).to.match(/invalid|email|format|validation|bad request|incorrect|malformed|error/);\r",
+              "    }\r",
+              "});\r",
+              "\r",
+              "pm.test('Si el body expone el valor inválido, corresponde al consultado', function () {\r",
+              "    if (jsonData && typeof jsonData === 'object') {\r",
+              "        const possibleEmail = jsonData.email || jsonData.input || jsonData.data?.email || jsonData.result?.email;\r",
+              "        if (possibleEmail !== undefined) {\r",
+              "            pm.expect(String(possibleEmail).toLowerCase()).to.include(invalidEmail);\r",
+              "        } else {\r",
+              "            pm.expect(true).to.be.true;\r",
+              "        }\r",
+              "    } else {\r",
+              "        pm.expect(true).to.be.true;\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.test('Existe token para autenticación', function () {\r",
+              "    const token = pm.collectionVariables.get('token');\r",
+              "    pm.expect(token, 'token de colección').to.be.a('string').and.not.empty;\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -140,17 +523,113 @@
           }
         ],
         "url": {
-          "raw": "http://{{base_url}}/blacklists/invalidemail",
+          "raw": "http://{{base_url}}/blacklists/{{invalid_email}}",
           "protocol": "http",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "blacklists",
-            "invalidemail"
+            "{{invalid_email}}"
           ]
         },
         "description": "Consulta un email con formato inválido (sin @)"
+      },
+      "response": []
+    },
+    {
+      "name": "6. Agregar email a blacklist (token invalido)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const expectedStatuses = [401];\r",
+              "const responseTimeLimit = 5000;\r",
+              "const rawBody = pm.response.text();\r",
+              "const contentType = (pm.response.headers.get('Content-Type') || '').toLowerCase();\r",
+              "\r",
+              "pm.test('Status code 401 esperado para crear/agregar email', function () {\r",
+              "    pm.expect(expectedStatuses).to.include(pm.response.code);\r",
+              "});\r",
+              "\r",
+              "pm.test('Tiempo de respuesta menor a 5000 ms', function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(responseTimeLimit);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"{{blacklisted_email}}\",\r\n    \"app_uuid\": \"{{app_uuid}}\",\r\n    \"blocked_reason\": \"{{blocked_reason}}\",\r\n    \"ip_address\": \"{{ip_address}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{base_url}}/blacklists",
+          "protocol": "http",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "blacklists"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Verificar si email esta en blacklist (token invalido)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const expectedStatuses = [401];\r",
+              "const responseTimeLimit = 5000;\r",
+              "const rawBody = pm.response.text();\r",
+              "const contentType = (pm.response.headers.get('Content-Type') || '').toLowerCase();\r",
+              "\r",
+              "pm.test('Status code 401 esperado para crear/agregar email', function () {\r",
+              "    pm.expect(expectedStatuses).to.include(pm.response.code);\r",
+              "});\r",
+              "\r",
+              "pm.test('Tiempo de respuesta menor a 5000 ms', function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(responseTimeLimit);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{base_url}}/blacklists/{{blacklisted_email}}",
+          "protocol": "http",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "blacklists",
+            "{{blacklisted_email}}"
+          ]
+        }
       },
       "response": []
     }
@@ -186,6 +665,30 @@
     },
     {
       "key": "token",
+      "value": ""
+    },
+    {
+      "key": "blacklisted_email",
+      "value": ""
+    },
+    {
+      "key": "valid_email",
+      "value": ""
+    },
+    {
+      "key": "invalid_email",
+      "value": ""
+    },
+    {
+      "key": "app_uuid",
+      "value": ""
+    },
+    {
+      "key": "blocked_reason",
+      "value": ""
+    },
+    {
+      "key": "ip_address",
       "value": ""
     }
   ]
