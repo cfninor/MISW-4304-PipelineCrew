@@ -71,7 +71,6 @@ MISW-4304-PipelineCrew/
 ├── Procfile
 ├── quick_test.py
 ├── README.md
-├── README-UPDATED.md
 ├── requirements.txt
 ├── test_db.py
 └── tests.py
