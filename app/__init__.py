@@ -1,4 +1,5 @@
 from flask import Flask
+from sqlalchemy import text
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_marshmallow import Marshmallow
@@ -48,6 +49,14 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+
+    @app.route("/health", methods=["GET"])
+    def health():
+        try:
+            db.session.execute(text("SELECT 1"))
+            return {"status": "ok", "database": "up"}, 200
+        except Exception as e:
+            return {"status": "error", "database": "down", "detail": str(e)}, 500
 
     #print("DENTRO DE create_app:", app.url_map)
     return app

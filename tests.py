@@ -186,7 +186,7 @@ class TestBlacklistResource:
 class TestBlacklistEmailResource:
     """Tests para GET /blacklists/<email>"""
     
-    def test_get_existing_email(self, client, app):
+    def test_get_existing_email(self, client, app, token):
         """Test: Obtener email que existe en blacklist"""
         with app.app_context():
             # Agregar un email a la base de datos
@@ -199,27 +199,33 @@ class TestBlacklistEmailResource:
             db.session.add(blacklist_item)
             db.session.commit()
         
-        response = client.get('/blacklists/existing@example.com')
+        response = client.get('/blacklists/existing@example.com',  headers={'Authorization': f'Bearer {token}'})
         
         assert response.status_code == 200
         data = response.get_json()
         assert data['exists'] is True
         assert data['blocked_reason'] == 'Envío de spam'
 
-    def test_get_non_existing_email(self, client):
+    def test_get_non_existing_email(self, client, token):
         """Test: Email que no existe en blacklist"""
-        response = client.get('/blacklists/nonexisting@example.com')
+        response = client.get('/blacklists/nonexisting@example.com',  headers={'Authorization': f'Bearer {token}'})
         
         assert response.status_code == 200
         data = response.get_json()
         assert data['exists'] is False
 
-    def test_get_invalid_email_format(self, client):
+    def test_get_invalid_email_format(self, client, token):
         """Test: Formato de email inválido en GET"""
-        response = client.get('/blacklists/invalid-email')
+        response = client.get('/blacklists/invalid-email',  headers={'Authorization': f'Bearer {token}'})
         
         assert response.status_code == 400
         assert 'email no tiene un formato válido' in response.get_json()['msg']
+
+    def test_get_without_token(self, client):
+        """Test: No permitir GET sin token JWT"""
+        response = client.get('/blacklists/test@example.com')
+        
+        assert response.status_code == 401
 
 
 class TestDatabasePersistence:
