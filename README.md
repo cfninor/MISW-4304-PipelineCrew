@@ -11,6 +11,16 @@ API REST desarrollada con Flask para gestionar una lista negra de correos electr
 | Carlos Niño | cf.ninor1@uniandes.edu.co | [cfninor](https://github.com/cfninor) |
 | Juan Rodriguez | j.rodriguezg@uniandes.edu.co | [jrodrgom](https://github.com/jrodrgom) |
 
+## Entregables
+
+| Entregable | Enlace |
+|---|---|
+| Video sustentación | [Ver video](https://youtu.be/jiFlagqQxyo) |
+| Documento entrega 1 | [Entrega1/Proyecto 1 entrega 1 - Documento.pdf](./Entrega1/Proyecto%201%20entrega%201%20-%20Documento.pdf) |
+| Documentación Postman | [Ver documentación](https://documenter.getpostman.com/view/48225661/2sBXitD7Yb) |
+| Collection | [Ver collection](https://github.com/cfninor/MISW-4304-PipelineCrew/blob/main%20/PipelineCrew%20-%20Blacklist%20API.postman_collection.json) |
+| Repositorio GitHub | [Ver repositorio](https://github.com/cfninor/MISW-4304-PipelineCrew) |
+
 ## Descripción
 
 La solución expone endpoints protegidos con JWT para:
@@ -235,7 +245,7 @@ La ejecución reportada para esta entrega fue realizada en **AWS**, utilizando:
 
 El objetivo de este README no es duplicar el paso a paso completo del aprovisionamiento y despliegue. Ese detalle quedó documentado en el archivo:
 
-- [`Entrega1/Proyecto 1 entrega 1 - Documento.docx`](./Entrega1/Proyecto%201%20entrega%201%20-%20Documento.docx)
+- [`Entrega1/Proyecto 1 entrega 1 - Documento.pdf`](./Entrega1/Proyecto%201%20entrega%201%20-%20Documento.pdf)
 
 En ese documento se encuentran los pasos de:
 
