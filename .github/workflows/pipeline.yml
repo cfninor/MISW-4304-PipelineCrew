@@ -26,8 +26,12 @@ jobs:
           pip install pytest pytest-flask
           
       - name: Ejecutar Pruebas Unitarias
-        # Si Pytest encuentra un error, este paso falla y detiene todo el pipeline
-        run: pytest tests.py -v
+        env:
+          DATABASE_URL: "sqlite:///:memory:"
+          TESTING: "True"
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest tests.py -v
 
   # SEGUNDO PASO: GENERAR ARTEFACTO (Solo si el anterior fue exitoso)
   build-artifact:

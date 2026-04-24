@@ -12,11 +12,17 @@ from uuid import uuid4
 
 @pytest.fixture
 def app():
-    """Crear aplicación de prueba con base de datos en memoria para CI/CD"""
+    """Crear aplicación de prueba con base de datos aislada"""
+    # Establecemos la variable de entorno ANTES de crear la app
+    import os
+    os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
+    
     app = create_app()
-    app.config['TESTING'] = True
-    # Importante: Usar SQLite en memoria para que el pipeline no dependa de un Postgres externo
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config.update({
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+        'JWT_SECRET_KEY': 'test-secret'
+    })
     
     with app.app_context():
         db.create_all()

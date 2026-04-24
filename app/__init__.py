@@ -18,45 +18,31 @@ jwt = JWTManager()
 def create_app():
     app = Flask(__name__)
 
+    # Priorizar la URL de la base de datos de las variables de entorno
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
         "DATABASE_URL",
         "postgresql://postgres:postgres@localhost:5432/blacklist_db"
     )
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = os.getenv(
-        "SQLALCHEMY_TRACK_MODIFICATIONS",
-        False
-    )
-    app.config["JWT_SECRET_KEY"] = os.getenv(
-        "JWT_SECRET_KEY",
-        "super-secret-key"
-    )
-    
-    # Convertir a entero (segundos) desde string
-    expires_seconds = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", 31536000))
-    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(seconds=expires_seconds)
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "super-secret-key")
 
     db.init_app(app)
     ma.init_app(app)
     jwt.init_app(app)
 
     api = Api(app)
-
     from app.resources import BlacklistResource, BlacklistEmailResource, TokenGeneratorResource
-
     api.add_resource(TokenGeneratorResource, "/generate-token")
     api.add_resource(BlacklistResource, "/blacklists")
     api.add_resource(BlacklistEmailResource, "/blacklists/<string:email>")
 
-    with app.app_context():
-        db.create_all()
+    # No ejecutar db.create_all() si se está en TESTING
+    # Los tests se encargan de crear sus propias tablas en memoria
+    if not app.config.get('TESTING'):
+        with app.app_context():
+            try:
+                db.create_all()
+            except Exception as e:
+                print(f"Error inicializando DB: {e}")
 
-    @app.route("/health", methods=["GET"])
-    def health():
-        try:
-            db.session.execute(text("SELECT 1"))
-            return {"status": "ok", "database": "up"}, 200
-        except Exception as e:
-            return {"status": "error", "database": "down", "detail": str(e)}, 500
-
-    #print("DENTRO DE create_app:", app.url_map)
     return app
