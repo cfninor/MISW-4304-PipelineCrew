@@ -1,0 +1,48 @@
+name: CI Blacklist API
+
+on:
+  push:
+    branches: [ "main", "master" ] # Se activa al subir cambios a estas ramas
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # PRIMER PASO: EJECUTAR PRUEBAS
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+      
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-flask
+          
+      - name: Ejecutar Pruebas Unitarias
+        # Si Pytest encuentra un error, este paso falla y detiene todo el pipeline
+        run: pytest tests.py -v
+
+  # SEGUNDO PASO: GENERAR ARTEFACTO (Solo si el anterior fue exitoso)
+  build-artifact:
+    needs: unit-tests # Restricción obligatoria: depende del éxito de las pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Crear paquete comprimido (Artefacto)
+        # Excluimos carpetas innecesarias como venv o cachés
+        run: zip -r proyecto_blacklist.zip . -x "*.git*" "venv/*" "*/__pycache__/*" ".env"
+
+      - name: Cargar Artefacto a GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-blacklist-package
+          path: proyecto_blacklist.zip
