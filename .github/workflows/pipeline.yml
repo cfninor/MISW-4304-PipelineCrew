@@ -2,9 +2,9 @@ name: CI Blacklist API
 
 on:
   push:
-    branches: [ "main", "master" ] # Se activa al subir cambios a estas ramas
+    branches: [ "main", "master", "tests/PU_pipeline" ] # Se activa al subir cambios a estas ramas
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "tests/PU_pipeline" ]
 
 jobs:
   # PRIMER PASO: EJECUTAR PRUEBAS
