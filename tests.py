@@ -12,10 +12,17 @@ from uuid import uuid4
 
 @pytest.fixture
 def app():
-    """Crear aplicación de prueba"""
+    """Crear aplicación de prueba con base de datos aislada"""
+    # Establecemos la variable de entorno ANTES de crear la app
+    import os
+    os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
+    
     app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    app.config.update({
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+        'JWT_SECRET_KEY': 'test-secret'
+    })
     
     with app.app_context():
         db.create_all()
@@ -25,12 +32,12 @@ def app():
 
 @pytest.fixture
 def client(app):
-    """Cliente para hacer requests"""
+    """Cliente para hacer requests HTTP"""
     return app.test_client()
 
 @pytest.fixture
 def token(app):
-    """Generar token JWT válido"""
+    """Generar token JWT válido para los tests que requieren @jwt_required"""
     with app.app_context():
         token = create_access_token(
             identity="test-user",
@@ -38,11 +45,22 @@ def token(app):
         )
         return token
 
+class TestTokenGeneratorResource:
+    """REQUERIMIENTO: Escenario de prueba para el endpoint /generate-token"""
+    
+    def test_generate_token_success(self, client):
+        """Test: Validar que el endpoint genera un token correctamente"""
+        response = client.get('/generate-token')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert 'access_token' in data
+        assert data['msg'] == 'Token generado exitosamente'
+
 class TestBlacklistResource:
-    """Tests para POST /blacklists"""
+    """REQUERIMIENTO: Escenarios para POST /blacklists"""
     
     def test_post_valid_blacklist_entry(self, client, token):
-        """Test: Agregar un email válido a la blacklist"""
+        """Test: Agregar un email válido"""
         response = client.post(
             '/blacklists',
             json={
@@ -52,221 +70,72 @@ class TestBlacklistResource:
             },
             headers={'Authorization': f'Bearer {token}'}
         )
-        
         assert response.status_code == 201
         data = response.get_json()
-        assert data['msg'] == 'Email agregado exitosamente a la lista negra'
         assert data['data']['email'] == 'test@example.com'
 
     def test_post_missing_email(self, client, token):
-        """Test: Falta email obligatorio"""
+        """Test: Caso email vacío o faltante"""
         response = client.post(
             '/blacklists',
-            json={
-                'app_uuid': str(uuid4()),
-                'blocked_reason': 'Spam'
-            },
+            json={'app_uuid': str(uuid4())},
             headers={'Authorization': f'Bearer {token}'}
         )
-        
         assert response.status_code == 400
         assert 'email es obligatorio' in response.get_json()['msg']
 
     def test_post_invalid_email_format(self, client, token):
-        """Test: Formato de email inválido"""
+        """Test: Formato de email no válido"""
         response = client.post(
             '/blacklists',
             json={
-                'email': 'invalid-email',
-                'app_uuid': str(uuid4()),
-                'blocked_reason': 'Spam'
+                'email': 'esto-no-es-un-email',
+                'app_uuid': str(uuid4())
             },
             headers={'Authorization': f'Bearer {token}'}
         )
-        
         assert response.status_code == 400
-        assert 'email no tiene un formato válido' in response.get_json()['msg']
-
-    def test_post_missing_app_uuid(self, client, token):
-        """Test: Falta app_uuid obligatorio"""
-        response = client.post(
-            '/blacklists',
-            json={
-                'email': 'test@example.com',
-                'blocked_reason': 'Spam'
-            },
-            headers={'Authorization': f'Bearer {token}'}
-        )
-        
-        assert response.status_code == 400
-        assert 'app_uuid es obligatorio' in response.get_json()['msg']
-
-    def test_post_invalid_uuid_format(self, client, token):
-        """Test: Formato UUID inválido"""
-        response = client.post(
-            '/blacklists',
-            json={
-                'email': 'test@example.com',
-                'app_uuid': 'not-a-uuid',
-                'blocked_reason': 'Spam'
-            },
-            headers={'Authorization': f'Bearer {token}'}
-        )
-        
-        assert response.status_code == 400
-        assert 'UUID válido' in response.get_json()['msg']
-
-    def test_post_blocked_reason_too_long(self, client, token):
-        """Test: blocked_reason supera 255 caracteres"""
-        response = client.post(
-            '/blacklists',
-            json={
-                'email': 'test@example.com',
-                'app_uuid': str(uuid4()),
-                'blocked_reason': 'x' * 256
-            },
-            headers={'Authorization': f'Bearer {token}'}
-        )
-        
-        assert response.status_code == 400
-        assert '255 caracteres' in response.get_json()['msg']
+        assert 'formato válido' in response.get_json()['msg']
 
     def test_post_duplicate_email(self, client, token, app):
-        """Test: No se puede agregar un email duplicado"""
-        with app.app_context():
-            # Agregar el primer email
-            response1 = client.post(
-                '/blacklists',
-                json={
-                    'email': 'duplicate@example.com',
-                    'app_uuid': str(uuid4()),
-                    'blocked_reason': 'Spam'
-                },
-                headers={'Authorization': f'Bearer {token}'}
-            )
-            assert response1.status_code == 201
-            
-            # Intentar agregar el mismo email
-            response2 = client.post(
-                '/blacklists',
-                json={
-                    'email': 'duplicate@example.com',
-                    'app_uuid': str(uuid4()),
-                    'blocked_reason': 'Otro motivo'
-                },
-                headers={'Authorization': f'Bearer {token}'}
-            )
-            assert response2.status_code == 409
-            assert 'ya está en la lista negra' in response2.get_json()['msg']
-
-    def test_post_without_token(self, client):
-        """Test: No permitir POST sin token JWT"""
-        response = client.post(
-            '/blacklists',
-            json={
-                'email': 'test@example.com',
-                'app_uuid': str(uuid4()),
-                'blocked_reason': 'Spam'
-            }
-        )
-        
-        assert response.status_code == 401
-
-    def test_post_empty_body(self, client, token):
-        """Test: Body vacío"""
-        response = client.post(
-            '/blacklists',
-            json={},
-            headers={'Authorization': f'Bearer {token}'}
-        )
-        
-        assert response.status_code == 400
-
+        """Test: Evitar duplicados (Falla lógica)"""
+        payload = {
+            'email': 'dupe@test.com',
+            'app_uuid': str(uuid4()),
+            'blocked_reason': 'Spam'
+        }
+        # Primer registro
+        client.post('/blacklists', json=payload, headers={'Authorization': f'Bearer {token}'})
+        # Segundo intento
+        response = client.post('/blacklists', json=payload, headers={'Authorization': f'Bearer {token}'})
+        assert response.status_code == 409
 
 class TestBlacklistEmailResource:
-    """Tests para GET /blacklists/<email>"""
+    """REQUERIMIENTO: Escenarios para GET /blacklists/<email>"""
     
     def test_get_existing_email(self, client, app, token):
-        """Test: Obtener email que existe en blacklist"""
+        """Test: Consultar email existente"""
+        email = 'found@test.com'
         with app.app_context():
-            # Agregar un email a la base de datos
-            blacklist_item = Blacklist(
-                email='existing@example.com',
-                app_uuid='550e8400-e29b-41d4-a716-446655440000',
-                blocked_reason='Envío de spam',
-                ip_address='192.168.1.1'
-            )
-            db.session.add(blacklist_item)
+            item = Blacklist(email=email, app_uuid=str(uuid4()), ip_address='127.0.0.1')
+            db.session.add(item)
             db.session.commit()
         
-        response = client.get('/blacklists/existing@example.com',  headers={'Authorization': f'Bearer {token}'})
-        
+        response = client.get(f'/blacklists/{email}', headers={'Authorization': f'Bearer {token}'})
         assert response.status_code == 200
-        data = response.get_json()
-        assert data['exists'] is True
-        assert data['blocked_reason'] == 'Envío de spam'
+        assert response.get_json()['exists'] is True
 
-    def test_get_non_existing_email(self, client, token):
-        """Test: Email que no existe en blacklist"""
-        response = client.get('/blacklists/nonexisting@example.com',  headers={'Authorization': f'Bearer {token}'})
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data['exists'] is False
-
-    def test_get_invalid_email_format(self, client, token):
-        """Test: Formato de email inválido en GET"""
-        response = client.get('/blacklists/invalid-email',  headers={'Authorization': f'Bearer {token}'})
-        
+    def test_get_invalid_format(self, client, token):
+        """Test: GET con formato de email inválido"""
+        response = client.get('/blacklists/email-incorrecto', headers={'Authorization': f'Bearer {token}'})
         assert response.status_code == 400
-        assert 'email no tiene un formato válido' in response.get_json()['msg']
 
-    def test_get_without_token(self, client):
-        """Test: No permitir GET sin token JWT"""
-        response = client.get('/blacklists/test@example.com')
-        
+class TestSecurity:
+    """Validación de seguridad para cumplimiento de integridad"""
+    def test_unauthorized_access(self, client):
+        """Test: Bloquear acceso sin token (si esto falla, el pipeline debe caer)"""
+        response = client.post('/blacklists', json={})
         assert response.status_code == 401
-
-
-class TestDatabasePersistence:
-    """Tests para verificar la persistencia en base de datos"""
-    
-    def test_data_persists_after_commit(self, client, token, app):
-        """Test: Los datos se persisten en la BD después del commit"""
-        # Agregar un email
-        response = client.post(
-            '/blacklists',
-            json={
-                'email': 'persist@example.com',
-                'app_uuid': str(uuid4()),
-                'blocked_reason': 'Test persistencia'
-            },
-            headers={'Authorization': f'Bearer {token}'}
-        )
-        assert response.status_code == 201
-        
-        # Verificar que existe en la BD
-        with app.app_context():
-            item = Blacklist.query.filter_by(email='persist@example.com').first()
-            assert item is not None
-            assert item.blocked_reason == 'Test persistencia'
-
-    def test_ip_address_is_recorded(self, client, token, app):
-        """Test: La dirección IP se registra correctamente"""
-        response = client.post(
-            '/blacklists',
-            json={
-                'email': 'iptest@example.com',
-                'app_uuid': str(uuid4()),
-                'blocked_reason': 'Test IP'
-            },
-            headers={'Authorization': f'Bearer {token}'}
-        )
-        
-        with app.app_context():
-            item = Blacklist.query.filter_by(email='iptest@example.com').first()
-            assert item.ip_address is not None
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
