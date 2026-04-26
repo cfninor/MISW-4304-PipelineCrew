@@ -137,5 +137,8 @@ class TestSecurity:
         response = client.post('/blacklists', json={})
         assert response.status_code == 401
 
+def test_pipeline_failure_controlado():
+    assert False
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
