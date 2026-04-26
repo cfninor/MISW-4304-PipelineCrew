@@ -27,12 +27,13 @@ phases:
     commands:
       - echo "Ejecutando pruebas unitarias..."
       - pytest tests.py -v
-
-  post_build:
-    commands:
       - echo "Pruebas finalizadas correctamente."
       - echo "Generando artefacto para despliegue posterior..."
       - zip -r proyecto_blacklist.zip . -x "*.git*" "env/*" ".venv/*" "__pycache__/*" "*/__pycache__/*" ".pytest_cache/*" ".env" "Entrega1/*" "Entrega2/*"
+
+  post_build:
+    commands:
+      - echo "Build finalizado."
 
 artifacts:
   files:
