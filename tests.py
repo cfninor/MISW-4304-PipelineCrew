@@ -21,7 +21,7 @@ def app():
     app.config.update({
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
-        'JWT_SECRET_KEY': 'test-secret'
+        'JWT_SECRET_KEY': 'mi-clave-super-segura-devops-entrega-1-2026'
     })
     
     with app.app_context():
