@@ -1,0 +1,40 @@
+version: 0.2
+
+env:
+  variables:
+    DATABASE_URL: "sqlite:///:memory:"
+    TESTING: "True"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Instalando dependencias del proyecto..."
+      - python --version
+      - python -m pip install --upgrade pip
+      - pip install -r requirements.txt
+      - pip install pytest pytest-flask
+
+  pre_build:
+    commands:
+      - echo "Preparando ambiente de pruebas..."
+      - export PYTHONPATH=$PYTHONPATH:$(pwd)
+      - echo "DATABASE_URL=$DATABASE_URL"
+      - echo "TESTING=$TESTING"
+
+  build:
+    commands:
+      - echo "Ejecutando pruebas unitarias..."
+      - pytest tests.py -v
+
+  post_build:
+    commands:
+      - echo "Pruebas finalizadas correctamente."
+      - echo "Generando artefacto para despliegue posterior..."
+      - zip -r proyecto_blacklist.zip . -x "*.git*" "env/*" ".venv/*" "__pycache__/*" "*/__pycache__/*" ".pytest_cache/*" ".env" "Entrega1/*" "Entrega2/*"
+
+artifacts:
+  files:
+    - proyecto_blacklist.zip
+  discard-paths: yes
