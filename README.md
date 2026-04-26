@@ -17,6 +17,7 @@ API REST desarrollada con Flask para gestionar una lista negra de correos electr
 |---|---|
 | Video sustentación | [Ver video](https://youtu.be/jiFlagqQxyo) |
 | Documento entrega 1 | [Entrega1/Proyecto 1 entrega 1 - Documento.pdf](./Entrega1/Proyecto%201%20entrega%201%20-%20Documento.pdf) |
+| Documento entrega 2 | [Entrega2/Proyecto 1 entrega 2 - Documento.docx](./Entrega2/Proyecto%201%20entrega%202%20-%20Documento.docx) |
 | Documentación Postman | [Ver documentación](https://documenter.getpostman.com/view/48225661/2sBXitD7Yb) |
 | Collection | [Ver collection](./PipelineCrew%20-%20Blacklist%20API.postman_collection.json) |
 | Repositorio GitHub | [Ver repositorio](https://github.com/cfninor/MISW-4304-PipelineCrew) |
@@ -53,10 +54,13 @@ La persistencia se realiza sobre PostgreSQL y el despliegue reportado para la en
 | `generate_token.py` | Genera un token JWT de prueba para consumo local. |
 | `tests.py` | Pruebas funcionales de los endpoints principales. |
 | `Procfile` | Configuración del proceso web para despliegues tipo plataforma. |
+| `buildspec.yml` | Configuración de fases y comandos para la construcción automatizada en AWS CodeBuild. |
 | `PipelineCrew - Blacklist API.postman_collection.json` | Colección de Postman para probar la API. |
 | `Entrega1/Proyecto 1 entrega 1 - Documento.docx` | Documento principal de la entrega con el detalle del despliegue en AWS. |
 | `Entrega1/Evidencias/AWS_Beanstalk/` | Evidencias del despliegue y configuración en Elastic Beanstalk. |
 | `Entrega1/Evidencias/AWS_RDS/` | Evidencias de configuración de Amazon RDS. |
+| `Entrega2/` | Carpeta con los documentos correspondientes a la segunda entrega. |
+| `Entrega2/Proyecto 1 entrega 2 - Documento.docx` | Documento principal de la entrega 2. |
 | `README.md` | Borrador o versión previa de documentación. |
 
 ## Estructura General
@@ -73,7 +77,10 @@ MISW-4304-PipelineCrew/
 │   │   ├── AWS_Beanstalk/
 │   │   └── AWS_RDS/
 │   └── Proyecto 1 entrega 1 - Documento.docx
+├── Entrega2/
+│   └── Proyecto 1 entrega 2 - Documento.docx
 ├── application.py
+├── buildspec.yml
 ├── demo.py
 ├── generate_token.py
 ├── init_db.py
@@ -236,6 +243,16 @@ Pruebas manuales con Postman:
 
 También se incluyen scripts auxiliares como `generate_token.py`, `quick_test.py` y `demo.py` para apoyo en validaciones locales.
 
+## Integración Continua
+
+El proyecto cuenta con un pipeline de integración continua configurado en **AWS CodePipeline** y **AWS CodeBuild**.
+
+El proceso se ejecuta automáticamente ante cambios en la rama `main`, instala las dependencias del proyecto, ejecuta las pruebas automatizadas y genera el artefacto de construcción definido para el pipeline.
+
+La configuración de las fases de construcción se encuentra en:
+
+- [`buildspec.yml`](./buildspec.yml)
+
 ## Despliegue en AWS
 
 La ejecución reportada para esta entrega fue realizada en **AWS**, utilizando:
@@ -264,5 +281,6 @@ Como respaldo adicional, el repositorio incluye evidencias visuales en:
 ## Notas
 
 - `Procfile` está incluido para el proceso `web` usado en despliegue.
+- `buildspec.yml` define las fases de instalación, preconstrucción, construcción y posconstrucción para la automatización del pipeline.
 - La ruta `/health` permite validar rápidamente que la aplicación responde y que la base de datos está disponible.
 - El modelo `Blacklist` registra correo, `app_uuid`, motivo de bloqueo, IP de origen y fecha de creación.
