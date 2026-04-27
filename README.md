@@ -15,9 +15,10 @@ API REST desarrollada con Flask para gestionar una lista negra de correos electr
 
 | Entregable | Enlace |
 |---|---|
-| Video sustentación | [Ver video](https://youtu.be/jiFlagqQxyo) |
+| Video sustentación entrega 1 | [Ver video](https://youtu.be/jiFlagqQxyo) |
+| Video sustentación entrega 2 | [Ver video]() |
 | Documento entrega 1 | [Entrega1/Proyecto 1 entrega 1 - Documento.pdf](./Entrega1/Proyecto%201%20entrega%201%20-%20Documento.pdf) |
-| Documento entrega 2 | [Entrega2/Proyecto 1 entrega 2 - Documento.docx](./Entrega2/Proyecto%201%20entrega%202%20-%20Documento.docx) |
+| Documento entrega 2 | [Entrega2/Proyecto 1 entrega 2 - Documento.pdf](./Entrega2/Proyecto%201%20entrega%202%20-%20Documento.pdf) |
 | Documentación Postman | [Ver documentación](https://documenter.getpostman.com/view/48225661/2sBXitD7Yb) |
 | Collection | [Ver collection](./PipelineCrew%20-%20Blacklist%20API.postman_collection.json) |
 | Repositorio GitHub | [Ver repositorio](https://github.com/cfninor/MISW-4304-PipelineCrew) |
