@@ -31,6 +31,11 @@ def create_app():
     jwt.init_app(app)
 
     api = Api(app)
+
+    @app.route("/")
+    def health_check():
+        return {"status": "ok"}, 200
+
     from app.resources import BlacklistResource, BlacklistEmailResource, TokenGeneratorResource
     api.add_resource(TokenGeneratorResource, "/generate-token")
     api.add_resource(BlacklistResource, "/blacklists")

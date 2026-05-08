@@ -22,20 +22,41 @@ phases:
       - export PYTHONPATH=$PYTHONPATH:$(pwd)
       - echo "DATABASE_URL=$DATABASE_URL"
       - echo "TESTING=$TESTING"
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 879980497605.dkr.ecr.us-east-2.amazonaws.com
+
 
   build:
     commands:
       - echo "Ejecutando pruebas unitarias..."
       - pytest tests.py -v
       - echo "Pruebas finalizadas correctamente."
-      - echo "Generando artefacto para despliegue posterior..."
-      - zip -r proyecto_blacklist.zip . -x "*.git*" "env/*" ".venv/*" "__pycache__/*" "*/__pycache__/*" ".pytest_cache/*" ".env" "Entrega1/*" "Entrega2/*"
+      - echo Build started on `date`
+      - echo Building the Docker image...          
+      - docker build -t repo-blacklist .
+      - docker tag repo-blacklist:latest 879980497605.dkr.ecr.us-east-2.amazonaws.com/repo-blacklist:latest
 
   post_build:
     commands:
       - echo "Build finalizado."
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push 879980497605.dkr.ecr.us-east-2.amazonaws.com/repo-blacklist:latest
+      - echo Writing Image Definitions file...
+      - printf '[{"name":"Container-app-python","imageUri":"879980497605.dkr.ecr.us-east-2.amazonaws.com/repo-blacklist:latest"}]' > imagedefinitions.json
+      - printf '{"ImageURI":"879980497605.dkr.ecr.us-east-2.amazonaws.com/repo-blacklist:latest"}' > imageDetail.json
+      - cat imagedefinitions.json 
 
 artifacts:
   files:
-    - proyecto_blacklist.zip
-  discard-paths: yes
+    - '**/*'
+    - imagedefinitions.json
+    - imageDetail.json
+  secondary-artifacts:
+    DefinitionArtifact:
+      files:
+        - appspec.yaml
+        - taskdef.json
+    ImageArtifact:
+      files:
+        - imageDetail.json
