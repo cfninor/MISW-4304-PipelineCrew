@@ -287,6 +287,7 @@ Los archivos de configuración asociados al despliegue son:
 - [`appspec.json`](./appspec.json): Define el proceso de despliegue en CodeDeploy.
 - [`Dockerfile`](./Dockerfile): Define la construcción de la imagen del contenedor.
 
+
 ## Despliegue en AWS
 
 La solución desplegada en esta entrega utiliza los siguientes servicios de **AWS**:
