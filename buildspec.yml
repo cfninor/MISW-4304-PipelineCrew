@@ -49,8 +49,7 @@ phases:
 
 artifacts:
   files:
-    - '**/*'
-    - imagedefinitions.json
-    - imageDetail.json
     - taskdef.json
     - appspec.json
+    - imageDetail.json
+  discard-paths: yes
