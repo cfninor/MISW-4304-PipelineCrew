@@ -19,6 +19,7 @@ API REST desarrollada con Flask para gestionar una lista negra de correos electr
 | Video sustentación entrega 2 | [Ver video](https://youtu.be/HmSQma7Fmjg) |
 | Documento entrega 1 | [Entrega1/Proyecto 1 entrega 1 - Documento.pdf](./Entrega1/Proyecto%201%20entrega%201%20-%20Documento.pdf) |
 | Documento entrega 2 | [Entrega2/Proyecto 1 entrega 2 - Documento.pdf](./Entrega2/Proyecto%201%20entrega%202%20-%20Documento.pdf) |
+| Documento entrega 3 | [Entrega3/Proyecto 1 entrega 3 - Documento.pdf](./Entrega3/Proyecto%201%20entrega%203%20-%20Documento.pdf) |
 | Documentación Postman | [Ver documentación](https://documenter.getpostman.com/view/48225661/2sBXitD7Yb) |
 | Collection | [Ver collection](./PipelineCrew%20-%20Blacklist%20API.postman_collection.json) |
 | Repositorio GitHub | [Ver repositorio](https://github.com/cfninor/MISW-4304-PipelineCrew) |
@@ -55,14 +56,18 @@ La persistencia se realiza sobre PostgreSQL y el despliegue reportado para la en
 | `generate_token.py` | Genera un token JWT de prueba para consumo local. |
 | `tests.py` | Pruebas funcionales de los endpoints principales. |
 | `Procfile` | Configuración del proceso web para despliegues tipo plataforma. |
-| `buildspec.yml` | Configuración de fases y comandos para la construcción automatizada en AWS CodeBuild. |
+| `buildspec.yml` | Configuración de fases y comandos para la construcción automatizada en AWS CodeBuild (incluye pruebas unitarias, build y push de la imagen). |
+| `Dockerfile` | Define la construcción de la imagen Docker del microservicio (runtime, dependencias y comando de ejecución). |
+| `appspec.json` | Archivo de configuración para AWS CodeDeploy que define cómo se realiza el despliegue en ECS/Fargate. |
+| `taskdef.json` | Definición de la tarea ECS (CPU, memoria, contenedor, imagen y variables de entorno) usada en el despliegue. |
 | `PipelineCrew - Blacklist API.postman_collection.json` | Colección de Postman para probar la API. |
 | `Entrega1/Proyecto 1 entrega 1 - Documento.docx` | Documento principal de la entrega con el detalle del despliegue en AWS. |
 | `Entrega1/Evidencias/AWS_Beanstalk/` | Evidencias del despliegue y configuración en Elastic Beanstalk. |
 | `Entrega1/Evidencias/AWS_RDS/` | Evidencias de configuración de Amazon RDS. |
 | `Entrega2/` | Carpeta con los documentos correspondientes a la segunda entrega. |
 | `Entrega2/Proyecto 1 entrega 2 - Documento.docx` | Documento principal de la entrega 2. |
-| `README.md` | Borrador o versión previa de documentación. |
+| `Entrega3/Proyecto 1 entrega 3 - Documento.docx` | Documento principal de la entrega 3. |
+| `README.md` | Documentación general del proyecto. |
 
 ## Estructura General
 
@@ -80,9 +85,13 @@ MISW-4304-PipelineCrew/
 │   └── Proyecto 1 entrega 1 - Documento.docx
 ├── Entrega2/
 │   └── Proyecto 1 entrega 2 - Documento.docx
+├── Entrega3/
+│   └── Proyecto 1 entrega 3 - Documento.docx
 ├── application.py
+├── appspec.json
 ├── buildspec.yml
 ├── demo.py
+├── Dockerfile
 ├── generate_token.py
 ├── init_db.py
 ├── PipelineCrew - Blacklist API.postman_collection.json
@@ -90,6 +99,7 @@ MISW-4304-PipelineCrew/
 ├── quick_test.py
 ├── README.md
 ├── requirements.txt
+├── taskdef.json
 ├── test_db.py
 └── tests.py
 ```
@@ -248,24 +258,56 @@ También se incluyen scripts auxiliares como `generate_token.py`, `quick_test.py
 
 El proyecto cuenta con un pipeline de integración continua configurado en **AWS CodePipeline** y **AWS CodeBuild**.
 
-El proceso se ejecuta automáticamente ante cambios en la rama `main`, instala las dependencias del proyecto, ejecuta las pruebas automatizadas y genera el artefacto de construcción definido para el pipeline.
+El pipeline se ejecuta automáticamente ante cambios en la rama `main` del repositorio y realiza las siguientes actividades:
+
+- Instalación de dependencias del proyecto.
+- Ejecución de pruebas automatizadas (pytest).
+- Construcción de la imagen Docker del microservicio.
+- Publicación de la imagen en **Amazon ECR (Elastic Container Registry)**.
 
 La configuración de las fases de construcción se encuentra en:
 
 - [`buildspec.yml`](./buildspec.yml)
 
+Este proceso garantiza que solo versiones validadas del código continúen hacia el despliegue.
+
+## Entrega Continua
+
+Posterior a una ejecución exitosa del proceso de integración continua, el pipeline realiza el despliegue automático del microservicio utilizando:
+
+- **AWS CodeDeploy**
+- **Amazon ECS con Fargate**
+
+El despliegue se realiza mediante una estrategia **blue/green**, permitiendo actualizar la aplicación sin afectar la disponibilidad del servicio.
+
+Los archivos de configuración asociados al despliegue son:
+
+- [`buildspec.yml`](./buildspec.yml): Define la configuración de la tarea ECS (contenedor, recursos, variables de entorno).
+- [`appspec.json`](./appspec.json): Define el proceso de despliegue en CodeDeploy.
+- [`Dockerfile`](./Dockerfile): Define la construcción de la imagen del contenedor.
+
 ## Despliegue en AWS
 
-La ejecución reportada para esta entrega fue realizada en **AWS**, utilizando:
+La solución desplegada en esta entrega utiliza los siguientes servicios de **AWS**:
 
-- **Elastic Beanstalk** para el despliegue de la aplicación Flask.
+- **Amazon ECS (Fargate)** para la ejecución del contenedor de la aplicación.
+- **Amazon ECR** para el almacenamiento de la imagen Docker.
+- **Application Load Balancer (ALB)** para exponer el servicio.
 - **Amazon RDS for PostgreSQL** para la base de datos.
 
-El objetivo de este README no es duplicar el paso a paso completo del aprovisionamiento y despliegue. Ese detalle quedó documentado en el archivo:
+A diferencia de la entrega 2, donde se utilizaba **Elastic Beanstalk** con despliegue basado en artefactos .zip, en esta versión se adopta una arquitectura basada en contenedores, lo que permite:
 
+- Mayor portabilidad del microservicio.
+- Despliegues más controlados y escalables.
+- Separación clara entre build y runtime.
+- Integración nativa con servicios modernos de AWS (ECS + Fargate).
+
+El objetivo de este README no es duplicar el paso a paso completo del aprovisionamiento y despliegue. Dicho detalle, incluyendo la configuración inicial en AWS y la implementación del pipeline de integración continua, fue documentado en las entregas previas:
+
+- [`Entrega2/Proyecto 1 entrega 2 - Documento.pdf`](./Entrega2/Proyecto%201%20entrega%202%20-%20Documento.pdf)
 - [`Entrega1/Proyecto 1 entrega 1 - Documento.pdf`](./Entrega1/Proyecto%201%20entrega%201%20-%20Documento.pdf)
 
-En ese documento se encuentran los pasos de:
+En este último documento se encuentran los pasos de:
 
 - configuración de RDS;
 - creación de roles en AWS;
