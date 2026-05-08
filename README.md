@@ -250,7 +250,7 @@ pytest tests.py -v
 Pruebas manuales con Postman:
 
 - Colección local: [`PipelineCrew - Blacklist API.postman_collection.json`](./PipelineCrew%20-%20Blacklist%20API.postman_collection.json)
-- Documentación publicada en Postman: <https://documenter.getpostman.com/view/48225661/2sBXitD7Yb>
+- Documentación publicada en Postman: <https://documenter.getpostman.com/view/34079512/2sBXqNkxz8>
 
 También se incluyen scripts auxiliares como `generate_token.py`, `quick_test.py` y `demo.py` para apoyo en validaciones locales.
 
