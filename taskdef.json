@@ -9,7 +9,12 @@
             "containerPort": 5000
           }
         ],
-
+        "environment": [
+                {
+                "name": "DATABASE_URL",
+                "value": "postgresql://postgres:~j(unP:$5#~diGu7BKXogvShwD#d@database-blacklist-db.ctqy8wcmg1za.us-east-2.rds.amazonaws.com:5432/blacklist_db"
+                }
+            ],
         "image": "<IMAGE1_NAME>",
         "essential": true,
         "name": "repo-blacklist"
