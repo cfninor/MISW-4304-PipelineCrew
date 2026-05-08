@@ -43,7 +43,7 @@ phases:
       - echo Pushing the Docker image...
       - docker push 879980497605.dkr.ecr.us-east-2.amazonaws.com/repo-blacklist:latest
       - echo Writing Image Definitions file...
-      - printf '[{"name":"Container-app-python","imageUri":"879980497605.dkr.ecr.us-east-2.amazonaws.com/repo-blacklist:latest"}]' > imagedefinitions.json
+      - printf '[{"name":"repo-blacklist","imageUri":"879980497605.dkr.ecr.us-east-2.amazonaws.com/repo-blacklist:latest"}]' > imagedefinitions.json
       - printf '{"ImageURI":"879980497605.dkr.ecr.us-east-2.amazonaws.com/repo-blacklist:latest"}' > imageDetail.json
       - cat imagedefinitions.json 
 
@@ -52,11 +52,5 @@ artifacts:
     - '**/*'
     - imagedefinitions.json
     - imageDetail.json
-  secondary-artifacts:
-    DefinitionArtifact:
-      files:
-        - appspec.yaml
-        - taskdef.json
-    ImageArtifact:
-      files:
-        - imageDetail.json
+    - taskdef.json
+    - appspec.json
