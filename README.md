@@ -271,6 +271,7 @@ La configuración de las fases de construcción se encuentra en:
 
 Este proceso garantiza que solo versiones validadas del código continúen hacia el despliegue.
 
+
 ## Entrega Continua
 
 Posterior a una ejecución exitosa del proceso de integración continua, el pipeline realiza el despliegue automático del microservicio utilizando:
