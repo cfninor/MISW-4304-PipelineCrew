@@ -17,7 +17,7 @@
             ],
         "image": "<IMAGE1_NAME>",
         "essential": true,
-        "name": "repo-blacklist-error"
+        "name": "repo-blacklist"
       }
     ],
 
