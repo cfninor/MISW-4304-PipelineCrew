@@ -295,7 +295,7 @@ La solución desplegada en esta entrega utiliza los siguientes servicios de **AW
 - **Amazon ECS (Fargate)** para la ejecución del contenedor de la aplicación.
 - **Amazon ECR** para el almacenamiento de la imagen Docker.
 - **Application Load Balancer (ALB)** para exponer el servicio.
-- **Amazon RDS for PostgreSQL** para la base de datos.
+- **Amazon RDS for PostgreSQL** para la base de datos relacional.
 
 A diferencia de la entrega 2, donde se utilizaba **Elastic Beanstalk** con despliegue basado en artefactos .zip, en esta versión se adopta una arquitectura basada en contenedores, lo que permite:
 
