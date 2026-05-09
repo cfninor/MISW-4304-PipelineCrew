@@ -6,7 +6,7 @@
           {
             "hostPort": 5000,
             "protocol": "tcp",
-            "containerPort": 5001
+            "containerPort": 5000
           }
         ],
         "environment": [
@@ -17,7 +17,7 @@
             ],
         "image": "<IMAGE1_NAME>",
         "essential": true,
-        "name": "repo-blacklist"
+        "name": "repo-blacklist-error"
       }
     ],
 
