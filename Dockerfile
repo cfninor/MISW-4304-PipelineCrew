@@ -11,4 +11,6 @@ COPY . .
 
 EXPOSE 5000
 
+ENV NEW_RELIC_CONFIG_FILE=/app/newrelic.ini
+
 CMD ["python3", "application.py"]
