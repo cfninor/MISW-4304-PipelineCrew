@@ -2,7 +2,8 @@ import asyncio
 import aiohttp
 import time
 
-# localmente: http://localhost:5000
+# localmente
+# BASE_URL = "http://localhost:5000" 
 # AWS
 BASE_URL = "http://LB-python-app-1781400546.us-east-2.elb.amazonaws.com" 
 DURATION = 45  # Duración ráfagas en segundos
