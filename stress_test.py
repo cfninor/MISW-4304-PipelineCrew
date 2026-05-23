@@ -4,7 +4,7 @@ import time
 
 # localmente: http://localhost:5000
 # AWS
-BASE_URL = "LB-python-app-1781400546.us-east-2.elb.amazonaws.com" 
+BASE_URL = "http://LB-python-app-1781400546.us-east-2.elb.amazonaws.com" 
 DURATION = 45  # Duración ráfagas en segundos
 CONCURRENT_REQUESTS = 15  # Peticiones por ráfaga
 
@@ -25,7 +25,7 @@ async def send_traffic(session, token):
         pass
 
 async def main():
-    print("🔑 Obteniendo Token JWT de pruebas...")
+    print("Obteniendo Token JWT de pruebas...")
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(f"{BASE_URL}/generate-token", timeout=5) as response:
