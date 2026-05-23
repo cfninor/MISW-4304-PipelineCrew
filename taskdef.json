@@ -1,32 +1,42 @@
 {
-    "executionRoleArn": "arn:aws:iam::879980497605:role/ecsTaskExecutionRole",
-    "containerDefinitions": [
-      {
-        "portMappings": [
+  "executionRoleArn": "arn:aws:iam::879980497605:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "portMappings": [
+        {
+          "hostPort": 5000,
+          "protocol": "tcp",
+          "containerPort": 5000
+        }
+      ],
+      "environment": [
           {
-            "hostPort": 5000,
-            "protocol": "tcp",
-            "containerPort": 5000
+            "name": "DATABASE_URL",
+            "value": "postgresql://postgres:~j(unP:$5#~diGu7BKXogvShwD#d@database-blacklist-db.ctqy8wcmg1za.us-east-2.rds.amazonaws.com:5432/blacklist_db"
+          },
+          {
+            "name": "NEW_RELIC_LICENSE_KEY",
+            "value": "5EEBCA54DD72C5B4BCCA3F55F7BB6E294D24A48A412A68CDE55DF9D043CDECB3"
+          },
+          {
+            "name": "NEW_RELIC_HOST",
+            "value": "collector.newrelic.com"
+          },
+          {
+            "name": "NEW_RELIC_APP_NAME",
+            "value": "PipelineCrew-Blacklist-Cloud"
           }
         ],
-        "environment": [
-                {
-                "name": "DATABASE_URL",
-                "value": "postgresql://postgres:~j(unP:$5#~diGu7BKXogvShwD#d@database-blacklist-db.ctqy8wcmg1za.us-east-2.rds.amazonaws.com:5432/blacklist_db"
-                }
-            ],
-        "image": "<IMAGE1_NAME>",
-        "essential": true,
-        "name": "repo-blacklist"
-      }
-    ],
-
-    "requiresCompatibilities": [
-      "FARGATE"
-    ],
-    "networkMode": "awsvpc",
-    "cpu": "512",
-    "memory": "1024",
-    "family": "Task-app-python"
-    
-  }
+      "image": "<IMAGE1_NAME>",
+      "essential": true,
+      "name": "repo-blacklist"
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc",
+  "cpu": "512",
+  "memory": "1024",
+  "family": "Task-app-python"
+}

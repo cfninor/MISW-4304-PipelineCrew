@@ -1,3 +1,9 @@
+import newrelic.agent
+try:
+    newrelic.agent.initialize('newrelic.ini')
+except Exception:
+    pass
+
 from app import create_app
 
 application = create_app()
