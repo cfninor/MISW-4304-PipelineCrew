@@ -18,7 +18,7 @@ API REST desarrollada con Flask para gestionar una lista negra de correos electr
 | Video sustentación entrega 1 | [Ver video](https://youtu.be/jiFlagqQxyo) |
 | Video sustentación entrega 2 | [Ver video](https://youtu.be/HmSQma7Fmjg) |
 | Video sustentación entrega 3 | [Ver video](https://youtu.be/1NV0gsgTPvU) |
-| Video sustentación entrega 3 | [Ver video]() |
+| Video sustentación entrega 4 | [Ver video](https://youtu.be/VLTQRLB7tOg) |
 | Documento entrega 1 | [Entrega1/Proyecto 1 entrega 1 - Documento.pdf](./Entrega1/Proyecto%201%20entrega%201%20-%20Documento.pdf) |
 | Documento entrega 2 | [Entrega2/Proyecto 1 entrega 2 - Documento.pdf](./Entrega2/Proyecto%201%20entrega%202%20-%20Documento.pdf) |
 | Documento entrega 3 | [Entrega3/Proyecto 1 entrega 3 - Documento.pdf](./Entrega3/Proyecto%201%20entrega%203%20-%20Documento.pdf) |
